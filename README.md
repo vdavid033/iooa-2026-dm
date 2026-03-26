@@ -2,6 +2,4 @@
 
 Društvena mreža Veleri
 
-Katja Blažević
-
-David Gušćić
+Katja Blažević, David Gušćić, Erik Šafarek
