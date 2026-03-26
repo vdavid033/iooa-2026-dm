@@ -3,3 +3,5 @@
 Društvena mreža Veleri
 
 Katja Blažević
+
+David Gušćić
