@@ -32,5 +32,4 @@ yarn-error.log*
 # local .env files
 .env.local*
 node_modules/
-package.json
-package-lock.json
+
