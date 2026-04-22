@@ -153,7 +153,7 @@ onMounted(async () => {
 <style scoped>
 .poruke-widget {
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
   background: white;
   border: 0.5px solid rgba(0, 0, 0, 0.12);
   border-radius: 12px;
