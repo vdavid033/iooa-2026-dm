@@ -52,7 +52,7 @@
       <div class="col-4 right-column">
         <div class="column q-gutter-md">
           <PorukePrikaz />
-          <div class="bg-grey-2 fit"><h1>Kalendar</h1></div>
+          <ObavezePrikaz />
         </div>
       </div>
     </div>
@@ -61,6 +61,7 @@
 
 <script setup>
 import PorukePrikaz from 'src/components/PorukePrikaz.vue'
+import ObavezePrikaz from 'src/components/ObavezePrikaz.vue'
 import { ref, onMounted } from 'vue'
 import { jwtDecode } from 'jwt-decode'
 import axios from 'axios'
@@ -111,6 +112,19 @@ function formatTime(dateStr) {
   const diff = Math.floor((now - d) / 86400000)
   if (diff < 7) return days[d.getDay()]
   return d.toLocaleDateString()
+}
+
+function formatTimeShort(timeStr) {
+  if (!timeStr) return ''
+  // Extract just HH:MM from time string like "21:30:00.000000"
+  return timeStr.substring(0, 5)
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  const dani = ['Nedjelja', 'Ponedjeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota']
+  return dani[d.getDay()]
 }
 
 onMounted(async () => {
@@ -174,6 +188,18 @@ onMounted(async () => {
   height: 8px;
   border-radius: 50%;
   background: #185fa5;
+}
+.forum-meta {
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.red-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #a51818;
 }
 .header-title {
   font-size: 11px;
