@@ -11,7 +11,7 @@
     <q-inner-loading :showing="loading">
       <q-spinner-dots size="40px" color="primary" />
     </q-inner-loading>
-    <div v-if="!loading && tjedan1.length === 0 && tjedan2.length === 0" class="status-msg">Nema obaveza za tekući i naredni tjedan.</div>
+    <div v-if="!loading && tjedan1.length === 0 && tjedan2.length === 0" class="status-msg">Nema novih obaveza</div>
 
     <!-- Ovaj tjedan -->
     <template v-if="tjedan1.length > 0">
@@ -21,7 +21,7 @@
       :key="obaveza.id_obaveze"
       :to="`/kalendar-obaveze`"
       class="obaveza-row"
-      :style="{ backgroundColor: getTipBgColor(obaveza.fk_tip_obaveze), borderLeftColor: getTipColor(obaveza.fk_tip_obaveze), borderBottomWidth: idx === tjedan1.length - 1 ? '0px' : '0.5px' }"
+      :style="{ backgroundColor: getTipBgColor(obaveza.fk_tip_obaveze), borderLeft: '4px solid ' + getTipColor(obaveza.fk_tip_obaveze), borderBottomWidth: idx === tjedan1.length - 1 ? '0px' : '0.5px' }"
     >
         <div class="obaveza-info">
           <div class="obaveza-title">{{ obaveza.opis_obaveze }}</div>
@@ -32,18 +32,18 @@
         </div>
       </router-link>
     </template>
-
+    
     <!-- Sljedeći tjedan -->
     <template v-if="tjedan2.length > 0">
        
       <div class="tjedan-label">Sljedeći tjedan ({{ formatDateRange(weekRanges.start2, weekRanges.end2) }})</div>
-    <router-link
-      v-for="(obaveza, idx) in tjedan2"
-      :key="obaveza.id_obaveze"
-      :to="`/kalendar-obaveze`"
-      class="obaveza-row"
-      :style="{ backgroundColor: getTipBgColor(obaveza.fk_tip_obaveze), borderLeftColor: getTipColor(obaveza.fk_tip_obaveze), borderBottomWidth: idx === tjedan2.length - 1 ? '0px' : '0.5px' }"
-    >
+      <router-link
+        v-for="(obaveza, idx) in tjedan2"
+        :key="obaveza.id_obaveze"
+        :to="`/kalendar-obaveze`"
+        class="obaveza-row"
+        :style="{ backgroundColor: getTipBgColor(obaveza.fk_tip_obaveze), borderLeft: '4px solid ' + getTipColor(obaveza.fk_tip_obaveze), borderBottomWidth: idx === tjedan2.length - 1 ? '0px' : '0.5px' }"
+      >
         <div class="obaveza-info">
           <div class="obaveza-title">{{ obaveza.opis_obaveze }}</div>
           <div class="obaveza-meta">
