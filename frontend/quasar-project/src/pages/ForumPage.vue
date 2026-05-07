@@ -101,7 +101,7 @@
       </q-card>
     </q-dialog>
 
-    <!-- Search bar + Filters (vizualno, statično) -->
+    <!-- Search bar + Filters -->
     <div class="row items-end search-filter-row" style="margin-bottom: 16px">
       <div class="col-9">
         <q-input
@@ -110,6 +110,9 @@
           dense
           placeholder="Pretraži forum po ključnoj riječi..."
           class="search-input bg-white rounded-borders"
+          clearable
+          @update:model-value="onSearchInput"
+          @clear="onSearchClear"
         >
           <template #prepend>
             <q-icon name="search" style="color: #9e9e9e" />
@@ -119,22 +122,36 @@
       <div class="col-3 q-pl-md">
         <div style="display: flex; gap: 8px; width: 100%">
           <q-select
-            v-model="selectedTagsStatic"
-            :options="[]"
-            label="Svi tagovi"
-            multiple
-            filled
-            dense
-            class="filter-select bg-white rounded-borders"
-          />
+  v-model="selectedTags"
+  :options="availableTags"
+  option-label="label"
+  option-value="value"
+  label="Svi tagovi"
+  multiple
+  use-chips
+  emit-value
+  map-options
+  filled
+  dense
+  clearable
+  class="filter-select bg-white rounded-borders"
+  @update:model-value="onTagFilter"
+  @clear="onTagClear"
+/>
           <q-select
-            v-model="selectedUserStatic"
-            :options="[]"
+            v-model="selectedUser"
+            :options="korisnici"
+            option-label="label"
+            option-value="id"
             label="Svi korisnici"
             filled
             dense
             clearable
+            emit-value
+            map-options
             class="filter-select bg-white rounded-borders"
+            @update:model-value="onUserFilter"
+            @clear="onUserClear"
           />
         </div>
       </div>
@@ -332,7 +349,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { api } from 'boot/axios'
@@ -350,17 +367,118 @@ const newTags = ref([])
 
 const isAuthenticated = computed(() => !!localStorage.getItem('token'))
 
-// Statični vizualni state (searchbar + filteri + kategorije)
+// ─── Search (K6) ──────────────────────────────────────────────────────────────
 const searchQuery = ref('')
-const selectedTagsStatic = ref([])
-const selectedUserStatic = ref(null)
+let searchDebounceTimer = null
+
+function onSearchInput(val) {
+  clearTimeout(searchDebounceTimer)
+  const q = (val || '').trim()
+  if (!q) {
+    fetchObjave()
+    return
+  }
+  searchDebounceTimer = setTimeout(() => {
+    fetchSearch(q)
+  }, 400)
+}
+
+function onSearchClear() {
+  clearTimeout(searchDebounceTimer)
+  fetchObjave()
+}
+
+async function fetchSearch(q) {
+  if (q.length < 2) return
+  loading.value = true
+  selectedUser.value = null
+  try {
+    const response = await axios.get(`http://localhost:3000/api/objave/search?q=${encodeURIComponent(q)}`)
+    posts.value = response.data
+    page.value = 1
+  } catch (error) {
+    console.error('Greška pri pretraživanju:', error)
+    $q.notify({ type: 'negative', message: 'Greška pri pretraživanju.', timeout: 2500 })
+  } finally {
+    loading.value = false
+  }
+}
+
+// ─── User filter (K7) ─────────────────────────────────────────────────────────
+const selectedTags = ref([])
+
+function onTagFilter(vals) {
+  if (!vals || vals.length === 0) { fetchObjave(); return }
+  searchQuery.value = ''
+  selectedUser.value = null
+  fetchObjaveByTags(vals)
+}
+
+function onTagClear() {
+  fetchObjave()
+}
+
+async function fetchObjaveByTags(tagIds) {
+  loading.value = true
+  try {
+    const response = await axios.get(
+      'http://localhost:3000/api/objave/filtrirane?tagovi=' +
+      selectedTags.value.map(id => {
+  const tag = availableTags.value.find(t => t.value === id)
+  return tag ? tag.label : id
+}).join(',')
+    )
+    posts.value = response.data
+    page.value = 1
+  } catch (error) {
+    console.error('Greska pri filtriranju po tagovima:', error)
+    $q.notify({ type: 'negative', message: 'Greska pri filtriranju po tagovima.', timeout: 2500 })
+  } finally {
+    loading.value = false
+  }
+}
+const selectedUser = ref(null)
+const korisnici = ref([])
+
+function onUserFilter(id) {
+  if (!id) { fetchObjave(); return }
+  searchQuery.value = ''
+  fetchObjaveByUser(id)
+}
+
+function onUserClear() {
+  fetchObjave()
+}
+
+async function fetchObjaveByUser(id) {
+  loading.value = true
+  try {
+    const response = await axios.get(`http://localhost:3000/api/objave/byuser?korisnik_id=${id}`)
+    posts.value = response.data
+    page.value = 1
+  } catch (error) {
+    console.error('Greška pri filtriranju po korisniku:', error)
+    $q.notify({ type: 'negative', message: 'Greška pri filtriranju po korisniku.', timeout: 2500 })
+  } finally {
+    loading.value = false
+  }
+}
+
+async function fetchKorisnici() {
+  try {
+    const response = await axios.get('http://localhost:3000/api/objave/korisnici')
+    korisnici.value = response.data
+  } catch (error) {
+    console.error('Ne mogu dohvatiti korisnike:', error)
+  }
+}
+
+// ─── Kategorija filter (lokalni) ──────────────────────────────────────────────
 const selectedCategory = ref('all')
-const categoryButtons = [
+const categoryButtons = computed(() => [
   { label: 'Sve objave', value: 'all' },
-  { label: 'Pitanja i odgovori', value: 'Pitanja i odgovori' },
-  { label: 'Razmjena materijala', value: 'Razmjena materijala' },
-  { label: 'Tehnička podrška', value: 'Tehnička podrška' },
-]
+  ...categories.value.map(c => ({ label: c.label, value: c.label }))
+])
 
 // Posts
 const posts = ref([])
@@ -371,9 +489,14 @@ const perPage = 4
 const availableTags = ref([])
 const categories = ref([])
 
-const maxPage = computed(() => Math.max(1, Math.ceil(posts.value.length / perPage)))
+const filteredPosts = computed(() => {
+  if (selectedCategory.value === 'all') return posts.value
+  return posts.value.filter(p => p.category === selectedCategory.value)
+})
+
+const maxPage = computed(() => Math.max(1, Math.ceil(filteredPosts.value.length / perPage)))
 const paginatedPosts = computed(() =>
-  posts.value.slice((page.value - 1) * perPage, page.value * perPage)
+  filteredPosts.value.slice((page.value - 1) * perPage, page.value * perPage)
 )
 
 function openCreateDialog() {
@@ -636,10 +759,13 @@ async function saveEdit() {
   }
 }
 
+watch(selectedCategory, () => { page.value = 1 })
+
 onMounted(() => {
   fetchObjave()
   fetchTagovi()
   fetchKategorije()
+  fetchKorisnici()
 })
 </script>
 
