@@ -386,6 +386,31 @@ app.get("/api/me", authJwt.verifyTokenUser, (req, res) => {
   });
 });
 
+// GET: Zadnje 5 tema za početnu stranicu
+app.get('/api/forum/latest', authJwt.verifyTokenUser, (req, res) => {
+  const sql = `
+    SELECT 
+      o.id_objava AS id,
+      o.naslov_objave AS title,
+      o.datum_objave AS date,
+      k.korisnicko_ime AS author,
+      kf.ime_kategorija_forum AS category
+    FROM objava o
+    LEFT JOIN korisnik k ON o.fk_korisnik = k.id_korisnika
+    LEFT JOIN kategorija_forum kf ON o.fk_kategorija = kf.id_kategorija_forum
+    ORDER BY o.datum_objave DESC
+    LIMIT 5
+  `
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('❌ Greška pri dohvaćanju zadnji tema:', err)
+      return res.status(500).json({ error: 'Greška pri dohvaćanju tema.' })
+    }
+    res.status(200).json(results)
+  })
+})
+
 
 
 // Pokretanje servera

@@ -112,6 +112,11 @@ app.use("/api/messages", require("./routes/messageRoutes"));
 app.use("/api/events", require("./routes/events"));
 app.use("/api/objave", require("./routes/objaveRoutes"));
 app.use("/api/comments", require("./routes/komentariRoutes"));
+
+// GET: Zadnje 5 tema za početnu stranicu
+const authJwt = require("./authJwt");
+const forumController = require("./controllers/forumController");
+app.get('/api/forum/latest', authJwt.verifyTokenUser, forumController.getLatestTopics)
 app.use("/api", require("./routes/reportRoutes"));
 app.use("/accountUpdate", require("./routes/accountRoutes"));
 app.use("/notes", require("./routes/accountNotesRoutes"));
