@@ -10,8 +10,8 @@ router.get("/sve-obaveze", authJwt.verifyTokenUser, (req, res) => {
   db.query(sql, (err, results) => {
     if (res.headersSent) return;
     if (err) {
-      console.error("Greška pri dohvaćanju svih obaveza:", err);
-      res.status(500).json({ error: "Greška pri dohvaćanju podataka." });
+      console.error("Gre��ka pri dohva��anju svih obaveza:", err);
+      res.status(500).json({ error: "Gre��ka pri dohva��anju podataka." });
     } else {
       res.status(200).json(results);
     }
@@ -37,8 +37,8 @@ router.get("/obaveze-za-tjedan", authJwt.verifyTokenUser, (req, res) => {
   db.query(sql, values, (err, results) => {
     if (res.headersSent) return;
     if (err) {
-      console.error("Greška pri dohvaćanju obaveza za tjedan:", err);
-      res.status(500).json({ error: "Greška pri dohvaćanju podataka." });
+      console.error("Gre��ka pri dohva��anju obaveza za tjedan:", err);
+      res.status(500).json({ error: "Gre��ka pri dohva��anju podataka." });
     } else {
       res.status(200).json(results);
     }
@@ -71,12 +71,12 @@ router.post("/unosObaveze", verifyTokenAdmin, (req, res) => {
   db.query(sql, values, (err, result) => {
     if (res.headersSent) return;
     if (err) {
-      console.error("Greška pri unosu obaveze:", err);
-      res.status(500).json({ error: "Neuspješan unos obaveze." });
+      console.error("Gre��ka pri unosu obaveze:", err);
+      res.status(500).json({ error: "Neuspje��an unos obaveze." });
     } else {
       res
         .status(201)
-        .json({ poruka: "Obaveza uspješno unesena.", id: result.insertId });
+        .json({ poruka: "Obaveza uspje��no unesena.", id: result.insertId });
     }
   });
 });
@@ -88,12 +88,12 @@ router.delete("/obaveza-brisanje/:id", authJwt.verifyTokenUser, (req, res) => {
   db.query(sql, [id, req.userId], (err, results) => {
     if (res.headersSent) return;
     if (err) {
-      console.error("Greška pri brisanju obaveze:", err);
-      res.status(500).json({ error: "Greška pri brisanju obaveze." });
+      console.error("Gre��ka pri brisanju obaveze:", err);
+      res.status(500).json({ error: "Gre��ka pri brisanju obaveze." });
     } else if (results.affectedRows > 0) {
-      res.status(200).json({ message: "Obaveza uspješno obrisana." });
+      res.status(200).json({ message: "Obaveza uspje��no obrisana." });
     } else {
-      res.status(404).json({ message: "Obaveza nije pronađena." });
+      res.status(404).json({ message: "Obaveza nije prona�'ena." });
     }
   });
 });
@@ -105,8 +105,8 @@ router.get("/tipoviObaveza", authJwt.verifyTokenUser, (req, res) => {
   db.query(sql, (err, results) => {
     if (res.headersSent) return;
     if (err) {
-      console.error("Greška pri dohvaćanju tipova obaveza:", err);
-      res.status(500).json({ error: "Greška pri dohvaćanju tipova obaveza." });
+      console.error("Gre��ka pri dohva��anju tipova obaveza:", err);
+      res.status(500).json({ error: "Gre��ka pri dohva��anju tipova obaveza." });
     } else {
       res.status(200).json(results);
     }
